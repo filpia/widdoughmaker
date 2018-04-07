@@ -87,7 +87,6 @@ class WIDTrader(object):
                         'currency':currency,
                         'notes':'success'}
 
-
 class WIDDoughMaker():
     
     def setUp(self):
@@ -149,7 +148,12 @@ class WIDDoughMaker():
     
     def market_rate(self,secID='SPIRIT000218',curr='USD'):
         try:
-            return self.trader.get_market_data(secID,curr)
+            r = self.trader.get_market_data(secID,curr)
+            if r == None:
+                return {'security_id':secID,
+                        'notes':'failure'}
+            else:
+                return r
         except:
             return {'security_id':secID,
                         'notes':'failure'}
@@ -160,3 +164,33 @@ class WIDDoughMaker():
         self.logged_session = response
         
         return response
+    
+    def alerts_helper(self,secID,base_price,alert_thresh_pct):
+        mr = self.market_rate(secID,'USD')
+        
+        if mr['current_buy_price']>base_price*(1+alert_thresh_pct):
+            return mr
+        else:
+            return {}
+        
+    
+    def alerts(self,alert_config):
+        alert_df = pd.read_csv(alert_config)
+        alert_items = ['barrel_type','distillery','qtr','year','security_id','current_buy_price']
+
+        alerts = []
+        
+        for f in alert_df.iterrows():
+            whisky = f[1]
+            alert_output = self.alerts_helper(whisky['security_id'],whisky['base_price'],whisky['notification_floor_pct'])
+            
+            if alert_output != {}:
+                new_alert = {}
+                new_alert['security_id'] = whisky['security_id']
+                new_alert['base_price'] = whisky['base_price']
+                new_alert['current_best_sell'] = alert_output['current_buy_price']
+                
+                alerts.append(new_alert)
+                
+        return alerts
+            
