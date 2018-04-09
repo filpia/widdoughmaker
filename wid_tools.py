@@ -5,14 +5,10 @@ import datetime
 import time
 from xml.etree import ElementTree
 import requests
-import unittest
 import urllib3
-import certifi
 import configparser
 import json
-from xml.etree import ElementTree as ET
 import pandas as pd
-import matplotlib.pyplot as plt
 import ast
 
 class WIDTrader(object):
@@ -105,7 +101,7 @@ class WIDDoughMaker():
     def get_pitches(self):
         self.fetch_pitches()
         
-        tree = ET.parse(self.pitch_path)
+        tree = ElementTree.parse(self.pitch_path)
         root = tree.getroot()
         
         pitches = []
@@ -188,7 +184,9 @@ class WIDDoughMaker():
                 new_alert = {}
                 new_alert['security_id'] = whisky['security_id']
                 new_alert['base_price'] = whisky['base_price']
-                new_alert['current_best_sell'] = alert_output['current_buy_price']
+                
+                for a in alert_items:
+                    new_alert[a] = alert_output[a]
                 
                 alerts.append(new_alert)
                 
