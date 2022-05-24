@@ -16,3 +16,9 @@ The WIDDoughMaker fetches assets (aka pitches) and their respective price histor
 
 3. Curl port running images
 `curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{}'`
+
+
+TODO:
+- Create ECR
+- push to ECR
+- test in lambda
