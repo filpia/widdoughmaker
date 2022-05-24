@@ -20,5 +20,7 @@ The WIDDoughMaker fetches assets (aka pitches) and their respective price histor
 
 TODO:
 - Create ECR
+Link here: https://docs.aws.amazon.com/lambda/latest/dg/images-create.html#images-create-from-base
+Link about tagging: https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-images.html#configuration-images-update
 - push to ECR
 - test in lambda
