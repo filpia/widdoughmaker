@@ -20,7 +20,7 @@ The WIDDoughMaker fetches assets (aka pitches) and their respective price histor
 4. Authenticate Docker to AWS ECR
 `aws ecr get-login-password --region us-east-1 --profile fil_personal | docker login --username AWS --password-stdin 400419513456.dkr.ecr.us-east-1.amazonaws.com`
 
-5. Create ECR Repository if it doesn't already exist
+5. Create ECR Repository if it doesn't already exist. Follow instructions for configuring ECR repository for Lambda [here](https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-images.html#configuration-images-update).
 `aws ecr create-repository --repository-name widdoughmaker --image-scanning-configuration scanOnPush=true --image-tag-mutability MUTABLE --profile fil_personal`
 
 6. Tag Docker image to match repository name
