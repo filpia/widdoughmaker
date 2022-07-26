@@ -4,6 +4,18 @@
 # Tools:
 The WIDDoughMaker fetches assets (aka pitches) and their respective price histories. Afterwards, exploratory data analysis via python
 
+# Infrastructure Overview
+
+1. Code in docker container for hitting API to fetch current rates
+
+2. Schedule docker container to execute as a lambda, outpput written to `s3://wid-prices`
+
+3. Use `etl/stack_records_wide_to_long.py` to transform the data from wide to long format, writing the output to `s3://wid-prices-processed`
+
+4. Configure AWS Glue crawler to traverse the `s3://wid-prices-processed` bucket, making the contents queryable on-demand. See configuration in section below
+
+5. Add partitions? 
+
 # Sample price chart
 [Click me](https://www.whiskyinvestdirect.com/tullibardine/2015/Q4/BBF/chart.do)
 
@@ -29,9 +41,9 @@ The WIDDoughMaker fetches assets (aka pitches) and their respective price histor
 7. Push Docker Image to ECR
 `docker push 400419513456.dkr.ecr.us-east-1.amazonaws.com/widdoughmaker:latest`
 
-TODO:
-- Create ECR
-Link here: https://docs.aws.amazon.com/lambda/latest/dg/images-create.html#images-create-from-base
-Link about tagging: https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-images.html#configuration-images-update
-- push to ECR
-- test in lambda
+# Configuring an AWS Glue Crawler
+
+Some AWS role set up is required but here is a screenshot of the crawler configuration
+
+![Glue]('images/aws_glue_crawler_config.png')
+
