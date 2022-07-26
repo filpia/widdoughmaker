@@ -12,6 +12,12 @@ import boto3
 import ast
 import os
 
+CONFIG_PATH = os.getenv('CONFIG_PATH')
+with open(CONFIG_PATH, 'r') as f:
+    CONFIG = json.load(f)
+USER = CONFIG['username']
+PW = CONFIG['password']
+
 class WIDTrader(object):
 
     API_POST_AUTHENTICATE = "https://www.whiskyinvestdirect.com/secure/j_security_check"
@@ -28,16 +34,7 @@ class WIDTrader(object):
     s3 = s3_session.client('s3')
 
     def authenticate(self):
-
-        if not (os.environ.get('WID_USERNAME') and os.environ.get('WID_PW')):
-            config = json.load(open("config/configuration.txt"))
-            user = config['username']
-            pw = config['password']
-        else:
-            user = os.environ.get('WID_USERNAME')
-            pw = os.environ.get('WID_PW')
-        creds = {'j_username': user, 'j_password': pw}
-
+        creds = {'j_username': USER, 'j_password': PW}
         login_resp = self.session.get(self.API_GET_SESSION)
         login_auth_resp = self.session.post(self.API_POST_AUTHENTICATE, data = creds, headers = login_resp.cookies)
 
