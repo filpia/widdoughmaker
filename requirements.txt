@@ -1,6 +1,6 @@
 
-pandas==1.1.2
-numpy==1.19.1
+pandas<2.0
+numpy
 boto3==1.14.63
 s3fs
 requests
