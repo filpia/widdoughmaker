@@ -1,3 +1,12 @@
+# TODOs
+- 
+- want to refactor so we can have a lambda take an s3 path and process it
+  - `etl/stack_records_wide_to_long.py` written to run in a single python sesh. Want to
+  take the atomic processing function and make it its own lambda which takes an s3 path as 
+  input. Ideally want the same Dockerfile to have multiple functions defined in app.py. Then the lambda
+  can specify its own CMD. Will also need to modify existing lambda that scrapes data
+- todo: whether to trigger a processing lambda upon a new object landing in s3?
+
 # Goals:
  - Investigate what whiskey asset classes malt/grain/first-fill/refill/etc, distilleries, and ages of product are most ripe for investment and probable gain
  
