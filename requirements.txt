@@ -1,6 +1,6 @@
 
 pandas<2.0
 numpy
-boto3==1.14.63
+boto3==1.20.32
 s3fs
 requests
