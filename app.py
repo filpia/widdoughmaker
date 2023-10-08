@@ -1,4 +1,5 @@
-import wid_tools as wt
+from scraping import wid_tools as wt
+from etl.stack_records_wide_to_long import prices_wide_to_long
 
 
 def handler(event, context):
@@ -33,3 +34,17 @@ def raise_error(event, context):
     :param context: lambda default requirement
     '''
     raise ValueError('This is an error')
+
+
+def process_prices(event, context):
+    """
+    Lambda handler that expects a file in s3 to be specified as a target. Target file will be processed from wide
+    orientation to long
+    :param event: lambda default requirement
+    :param context: lambda default requirement
+    """
+    prices_wide_to_long(
+        download_bucket='wid-prices-test',
+        key='2023/10/02/prices_010808.csv',
+        upload_bucket='wid-prices-processed-test',
+    )
