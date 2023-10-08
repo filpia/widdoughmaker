@@ -6,7 +6,6 @@ FROM public.ecr.aws/lambda/python:3.11-arm64
 
 COPY requirements.txt  .
 RUN  pip3 install -r requirements.txt --target "${LAMBDA_TASK_ROOT}"
-#RUN  pip install -r requirements.txt --target "${LAMBDA_TASK_ROOT}"
 
 RUN mkdir -p  /config
 
@@ -16,7 +15,8 @@ ENV CONFIG_PATH=/config/configuration.txt
 # Copy function code
 COPY app.py ${LAMBDA_TASK_ROOT}
 COPY config/configuration.txt ${CONFIG_PATH}
-COPY wid_tools.py ${LAMBDA_TASK_ROOT}
+COPY scraping/ ${LAMBDA_TASK_ROOT}/scraping/
+COPY etl/ ${LAMBDA_TASK_ROOT}/etl/
 
 # When testing in local docker container, mount aws config to test push to s3
 # ENV AWS_CONFIG_FILE=/config/aws/config
