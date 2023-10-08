@@ -20,7 +20,7 @@ import pandas as pd
 from pathlib import Path
 
 raw_bucket = 'wid-prices'
-processed_bucket = 'wid-prices-processed'
+bucket = 'wid-prices-processed'
 s3_client = boto3.client('s3')
 
 
@@ -54,23 +54,23 @@ def stack_df(df, key):
 
 def fix_and_upload(staging_fname, upload_bucket, upload_key):
     '''
-    Using a local staging file, write data to s3 bucket
+    Read file from disk, write data to s3 bucket
     :param staging_fname: local file to be used as staging file
     :param upload_bucket: bucket to upload file to
     :param upload_key: file name to give to uploaded file
     :return: None
     '''
-    buffer_to_upload = io.BytesIO()
+    buffer_to_read = io.BytesIO()
     with open(staging_fname, 'r') as inFile:
         r = csv.reader(inFile)
         # copy the rest
         for i, row in enumerate(r):
             if i == 0:
                 row[0] = 'index'
-            buffer_to_upload.write((','.join(row) + '\n').encode('utf-8'))
-    buffer_to_upload.seek(0)
+            buffer_to_read.write((','.join(row) + '\n').encode('utf-8'))
+    buffer_to_read.seek(0)
     # easier to manipulate as df
-    df = pd.read_csv(buffer_to_upload)
+    df = pd.read_csv(buffer_to_read)
     df = stack_df(df, upload_key)
     buffer_to_upload = io.StringIO()
     df.to_csv(buffer_to_upload, index=False)
@@ -79,21 +79,19 @@ def fix_and_upload(staging_fname, upload_bucket, upload_key):
     return None
 
 
-staging_fname = 'stage.csv'
-paginator = s3_client.get_paginator('list_objects')
-page_iterator = paginator.paginate(Bucket=raw_bucket)
+def prices_wide_to_long(download_bucket, key, upload_bucket, staging_fname='stage.csv'):
+    """
+    Pull a wide file from download_bucket with path key, transform it to long file and write to another bucket
+    using name key as path
+    :param download_bucket: s3 bucket to download from
+    :param upload_bucket: s3 bucket to upload to
+    :param key: path in bucket where file is downloaded from/written to
+    :param staging_fname: name of file on local disk
+    :return:
+    """
+    s3_client.download_file(Bucket=download_bucket, Key=key, Filename=staging_fname)
+    fix_and_upload(staging_fname=staging_fname, upload_bucket=upload_bucket, upload_key=key)
+    return
 
-for page in page_iterator:
-    for obj in page['Contents']:
-        processed_files_pref = s3_client.list_objects(Bucket=processed_bucket, Prefix=obj['Key'])
-        if len(processed_files_pref.get('Contents', [])) == 0:
-            s3_client.download_file(Bucket=raw_bucket, Key=obj['Key'], Filename=staging_fname)
-            try:
-                fix_and_upload(staging_fname, processed_bucket, obj['Key'])
-            except Exception as e:
-                print(f"Error processing {obj['Key']}")
-                Path(f"errors_processing/{obj['Key']}").mkdir(parents=True, exist_ok=True)
-                os.system(f"touch /home/ec2-user/SageMaker/wid-prices/errors_processing/{obj['Key']}.txt")
-                pass
-        else:
-            print(f"Skipping {obj['Key']} because processed version already exists")
+
+
