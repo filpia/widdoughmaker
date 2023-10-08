@@ -29,6 +29,11 @@ The WIDDoughMaker fetches assets (aka pitches) and their respective price histor
 [Click me](https://www.whiskyinvestdirect.com/tullibardine/2015/Q4/BBF/chart.do)
 
 # Building and Testing Docker Image for Lambda
+
+## The Short Way
+
+
+## The Long Way
 1. Populate `config/configuration.txt` with Whiskey credentials
 
 2. Populate `config/aws_config.txt` with AWS IAM creds
@@ -41,30 +46,17 @@ command will be run in AWS lambda where credentials are part of the sesion
 ```
 
 4. From repo root, run
-`docker build . -t widdoughmaker:YOUR_TAG`
+`./bin/build_and_push.sh YOUR_TAG`
 
 5. Run docker image
 `docker run -it --rm -p 9000:8080 widdoughmaker:YOUR_TAG`
 
-6. Curl port running images
+6. To test, curl port running images
 `curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{}'`
 
 7. Comment out lines in Dockerfile from item 3
 
-8. Authenticate Docker to AWS ECR.
-**Note:** Assumes your `~/.aws/config` is properly set to access your aws environment 
-
-`aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 400419513456.dkr.ecr.us-east-1.amazonaws.com`
-
-9. Create ECR Repository if it doesn't already exist. Follow instructions for configuring ECR repository for Lambda [here](https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-images.html#configuration-images-update).
-`aws ecr create-repository --repository-name widdoughmaker --image-scanning-configuration scanOnPush=true --image-tag-mutability MUTABLE --profile fil_personal`
-
-10. Tag Docker image to match repository name
-`docker tag  widdoughmaker:YOUR_TAG 400419513456.dkr.ecr.us-east-1.amazonaws.com/widdoughmaker:YOUR_TAG`
-
-11. Push Docker Image to ECR
-`docker push 400419513456.dkr.ecr.us-east-1.amazonaws.com/widdoughmaker:YOUR_TAG`
-12. In the Lambda console, choose to deploy a new image. Make sure to specify the correct architecture for your image
+8. In the Lambda console, choose to deploy a new image. Make sure to specify the correct architecture for your image
 either arm64 or x86
 
 # Configuring an AWS Glue Crawler
