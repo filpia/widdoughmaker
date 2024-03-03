@@ -44,8 +44,8 @@ def process_prices_last_month(event, context):
     :param event: lambda default requirement
     :param context: lambda default requirement
     """
-    download_bucket = 'wid-prices-test'
-    upload_bucket = 'wid-prices-processed-test'
+    download_bucket = 'wid-prices'
+    upload_bucket = 'wid-prices-processed'
     last_month_bucket_str = (pd.Timestamp.now() - pd.DateOffset(month=1)).strftime('%Y/%m')
     print(f'Processing files in bucket s3://{download_bucket}/{last_month_bucket_str}')
     crawl_and_process_bucket(
