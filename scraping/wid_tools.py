@@ -24,7 +24,7 @@ class WIDTrader(object):
     API_STATIC_MARKET = "http://www.whiskyinvestdirect.com/view_market_xml.do"
     API_GET_BALANCE = "https://www.whiskyinvestdirect.com/secure/api/v2/view_balance_xml.do"
     API_GET_CHART_TEMPLATE = "https://www.whiskyinvestdirect.com/{distillery}/{bondYear}/{bondQuarter}/{barrelTypeCode}/chart.do"
-    S3_BUCKET = "wid-prices-test"
+    S3_BUCKET = "wid-prices"
 
     session = requests.Session()
     raw_market_data = None
