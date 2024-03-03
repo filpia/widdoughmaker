@@ -95,6 +95,10 @@ def prices_wide_to_long(download_bucket, key, upload_bucket, s3_client):
 
 def crawl_and_process_bucket(download_bucket, upload_bucket, prefix=''):
     """_summary_
+    Initialize an s3 client and list objects in download_bucket matching a prefix. Check whether to process
+    that file by seeing whether there's an accompanying one in the upload_bucket.
+
+    If Exception is hit, create a local cookie file to denote the problematic record for future resolution
     """
     s3_client = boto3.client('s3')
     paginator = s3_client.get_paginator('list_objects_v2')
