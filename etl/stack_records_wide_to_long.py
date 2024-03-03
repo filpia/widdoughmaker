@@ -1,6 +1,7 @@
 """
-TODO: docstring for file
+Processing script to take wide files and transform to long
 
+Traverse s3 bucket to find raw files which don't have processed counterpart
 """
 import boto3
 import io
