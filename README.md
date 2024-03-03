@@ -1,7 +1,6 @@
-# TODOs
-- 
-- want to refactor so we can have a lambda take an s3 path and process it
-- todo: whether to trigger a processing lambda upon a new object landing in s3?
+# In-progress
+- todo: schedule a lambda to process last month's raw files
+- todo: send email on failure
 
 # Goals:
  - Investigate what whiskey asset classes malt/grain/first-fill/refill/etc, distilleries, and ages of product are most ripe for investment and probable gain
