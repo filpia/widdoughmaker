@@ -35,7 +35,6 @@ def wide_to_long(df, key):
     # TODO: how to filter and alert if weird values creep in..
     # IDEA: filter out null column name first then assert all cols start with po or so
     # Current values seem to begin with po_ and so_
-    # tmp = tmp.query('value_field!="index"').copy()
     tmp = tmp[tmp['value_field'].str.startswith('po_') |
               tmp['value_field'].str.startswith('so_')
               ].copy()
