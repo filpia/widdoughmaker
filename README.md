@@ -1,11 +1,6 @@
-# TODOs
-- 
-- want to refactor so we can have a lambda take an s3 path and process it
-  - `etl/stack_records_wide_to_long.py` written to run in a single python sesh. Want to
-  take the atomic processing function and make it its own lambda which takes an s3 path as 
-  input. Ideally want the same Dockerfile to have multiple functions defined in app.py. Then the lambda
-  can specify its own CMD. Will also need to modify existing lambda that scrapes data
-- todo: whether to trigger a processing lambda upon a new object landing in s3?
+# In-progress
+- todo: schedule a lambda to process last month's raw files
+- todo: send email on failure
 
 # Goals:
  - Investigate what whiskey asset classes malt/grain/first-fill/refill/etc, distilleries, and ages of product are most ripe for investment and probable gain
@@ -25,10 +20,33 @@ The WIDDoughMaker fetches assets (aka pitches) and their respective price histor
 
 5. Add partitions? 
 
+# Seting up Local Environment with AWS Creds
+
+1. Create a file in the following format
+```
+[default]
+aws_access_key_id = string
+aws_secret_access_key = string
+region = us-east-1
+output = json
+```
+
+2. Specify the path to that file as the environment variable `AWS_CONFIG_FILE`
+```bash
+export AWS_CONFIG_FILE=string
+```
+
+# Transform Records From Wide to Long
+
 # Sample price chart
 [Click me](https://www.whiskyinvestdirect.com/tullibardine/2015/Q4/BBF/chart.do)
 
 # Building and Testing Docker Image for Lambda
+
+## The Short Way
+
+
+## The Long Way
 1. Populate `config/configuration.txt` with Whiskey credentials
 
 2. Populate `config/aws_config.txt` with AWS IAM creds
@@ -41,30 +59,17 @@ command will be run in AWS lambda where credentials are part of the sesion
 ```
 
 4. From repo root, run
-`docker build . -t widdoughmaker:YOUR_TAG`
+`./bin/build_and_push.sh YOUR_TAG`
 
 5. Run docker image
 `docker run -it --rm -p 9000:8080 widdoughmaker:YOUR_TAG`
 
-6. Curl port running images
+6. To test, curl port running images
 `curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{}'`
 
 7. Comment out lines in Dockerfile from item 3
 
-8. Authenticate Docker to AWS ECR.
-**Note:** Assumes your `~/.aws/config` is properly set to access your aws environment 
-
-`aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 400419513456.dkr.ecr.us-east-1.amazonaws.com`
-
-9. Create ECR Repository if it doesn't already exist. Follow instructions for configuring ECR repository for Lambda [here](https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-images.html#configuration-images-update).
-`aws ecr create-repository --repository-name widdoughmaker --image-scanning-configuration scanOnPush=true --image-tag-mutability MUTABLE --profile fil_personal`
-
-10. Tag Docker image to match repository name
-`docker tag  widdoughmaker:YOUR_TAG 400419513456.dkr.ecr.us-east-1.amazonaws.com/widdoughmaker:YOUR_TAG`
-
-11. Push Docker Image to ECR
-`docker push 400419513456.dkr.ecr.us-east-1.amazonaws.com/widdoughmaker:YOUR_TAG`
-12. In the Lambda console, choose to deploy a new image. Make sure to specify the correct architecture for your image
+8. In the Lambda console, choose to deploy a new image. Make sure to specify the correct architecture for your image
 either arm64 or x86
 
 # Configuring an AWS Glue Crawler

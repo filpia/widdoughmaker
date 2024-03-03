@@ -2,10 +2,8 @@
 Adapted from code at https://github.com/amri/BVTrader
 '''
 import datetime
-import time
 from xml.etree import ElementTree
 import requests
-import configparser
 import json
 import pandas as pd
 import boto3
@@ -160,17 +158,21 @@ class WIDDoughMaker():
     def pitches(self):
         return self.all_pitches_in_mkt()
 
-    def market_rate(self,secID='SPIRIT000218',curr='USD'):
+    def market_rate(self, secID='SPIRIT000218', curr='USD'):
         try:
-            r = self.trader.get_market_data(secID,curr)
-            if r == None:
-                return {'security_id':secID,
-                        'notes':'failure'}
+            r = self.trader.get_market_data()
+            if r is None:
+                return {
+                    'security_id': secID,
+                    'notes': 'failure'
+                    }
             else:
                 return r
-        except:
-            return {'security_id':secID,
-                        'notes':'failure'}
+        except Exception:
+            return {
+                'security_id':secID,
+                'notes':'failure'
+                }
 
     def login(self):
         response = self.trader.authenticate()
