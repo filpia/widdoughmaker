@@ -1,10 +1,9 @@
 # TODOs
 - 
 - want to refactor so we can have a lambda take an s3 path and process it
-  - `etl/stack_records_wide_to_long.py` written to run in a single python sesh. Want to
-  take the atomic processing function and make it its own lambda which takes an s3 path as 
-  input. Ideally want the same Dockerfile to have multiple functions defined in app.py. Then the lambda
-  can specify its own CMD. Will also need to modify existing lambda that scrapes data
+  - Current bug: Read-only file system: 'stage.csv.C1C7B3d0'
+  - Log to current bug: https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#logsV2:log-groups/log-group/%2Faws%2Flambda%2Fwid-Docker-test/log-events/2023%2F10%2F08%2F[%24LATEST]5dcad3a09541448ca486c12c9856fe68?start=PT1H
+  - looks like need to download the file to memory instead of disk. nbd
 - todo: whether to trigger a processing lambda upon a new object landing in s3?
 
 # Goals:
@@ -24,6 +23,24 @@ The WIDDoughMaker fetches assets (aka pitches) and their respective price histor
 4. Configure AWS Glue crawler to traverse the `s3://wid-prices-processed` bucket, making the contents queryable on-demand. See configuration in section below
 
 5. Add partitions? 
+
+# Seting up Local Environment with AWS Creds
+
+1. Create a file in the following format
+```
+[default]
+aws_access_key_id = string
+aws_secret_access_key = string
+region = us-east-1
+output = json
+```
+
+2. Specify the path to that file as the environment variable `AWS_CONFIG_FILE`
+```bash
+export AWS_CONFIG_FILE=string
+```
+
+# Transform Records From Wide to Long
 
 # Sample price chart
 [Click me](https://www.whiskyinvestdirect.com/tullibardine/2015/Q4/BBF/chart.do)
