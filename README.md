@@ -1,9 +1,6 @@
 # TODOs
 - 
 - want to refactor so we can have a lambda take an s3 path and process it
-  - Current bug: Read-only file system: 'stage.csv.C1C7B3d0'
-  - Log to current bug: https://us-east-1.console.aws.amazon.com/cloudwatch/home?region=us-east-1#logsV2:log-groups/log-group/%2Faws%2Flambda%2Fwid-Docker-test/log-events/2023%2F10%2F08%2F[%24LATEST]5dcad3a09541448ca486c12c9856fe68?start=PT1H
-  - looks like need to download the file to memory instead of disk. nbd
 - todo: whether to trigger a processing lambda upon a new object landing in s3?
 
 # Goals:
