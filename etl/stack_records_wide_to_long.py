@@ -102,7 +102,6 @@ def crawl_and_process_bucket(download_bucket, upload_bucket, prefix=''):
         Bucket=download_bucket,
         Prefix=prefix
         )
-    files_to_skip = []
     for page in page_iterator:
         for obj in page['Contents']:
             processed_files_pref = s3_client.list_objects(Bucket=upload_bucket, Prefix=obj['Key'])
@@ -119,13 +118,12 @@ def crawl_and_process_bucket(download_bucket, upload_bucket, prefix=''):
                     Path(f"errors_processing/{obj['Key']}").mkdir(parents=True, exist_ok=True)
                     os.system(f"touch errors_processing/{obj['Key']}.txt")
             else:
-                files_to_skip.append(processed_files_pref['Contents'][0])
-                #print(f"Skipping {obj['Key']} because processed version already exists")
+                print(f"Skipping {obj['Key']} because processed version already exists")
 
 
 if __name__ == "__main__":
     # modify prefix as needed YEAR/MONTH/DAY/FILE_NAME
-    days = list(map(lambda x: x.strftime("%Y/%m/%d"), pd.date_range('2024-01-01','2024-03-01', freq='D')))[::7]
+    days = list(map(lambda x: x.strftime("%Y/%m/%d"), pd.date_range('2023-01-01','2023-12-31', freq='W-MON')))
     for day_as_bucket in days:
         crawl_and_process_bucket(
             download_bucket=RAW_BUCKET,
