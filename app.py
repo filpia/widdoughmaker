@@ -1,5 +1,6 @@
 from scraping import wid_tools as wt
-from etl.stack_records_wide_to_long import prices_wide_to_long
+from etl.stack_records_wide_to_long import crawl_and_process_bucket
+import pandas as pd
 
 
 def handler(event, context):
@@ -36,15 +37,19 @@ def raise_error(event, context):
     raise ValueError('This is an error')
 
 
-def process_prices(event, context):
+def process_prices_last_month(event, context):
     """
     Lambda handler that expects a file in s3 to be specified as a target. Target file will be processed from wide
     orientation to long
     :param event: lambda default requirement
     :param context: lambda default requirement
     """
-    prices_wide_to_long(
-        download_bucket='wid-prices-test',
-        key='2023/10/02/prices_010808.csv',
-        upload_bucket='wid-prices-processed-test',
-    )
+    download_bucket = 'wid-prices-test'
+    upload_bucket = 'wid-prices-processed-test'
+    last_month_bucket_str = (pd.Timestamp.now() - pd.DateOffset(month=1)).strftime('%Y/%m')
+    print(f'Processing files in bucket s3://{download_bucket}/{last_month_bucket_str}')
+    crawl_and_process_bucket(
+        download_bucket=download_bucket,
+        upload_bucket=upload_bucket,
+        prefix=last_month_bucket_str
+        )
