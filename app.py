@@ -1,6 +1,10 @@
 from scraping import wid_tools as wt
-from etl.stack_records_wide_to_long import crawl_and_process_bucket
+from etl.stack_records_wide_to_long import crawl_and_process_bucket, prices_wide_to_long
 import pandas as pd
+import boto3
+
+DOWNLOAD_BUCKET = 'wid-prices'
+UPLOAD_BUCKET = 'wid-prices-processed'
 
 
 def handler(event, context):
@@ -37,6 +41,24 @@ def raise_error(event, context):
     raise ValueError('This is an error')
 
 
+def process_file_s3_trigger(event, context):
+    """_summary_
+    Triggered when a file is added to s3 bucket this lambda is configured for. Processes that file from wide to long
+
+    :param event: information about the event that triggered this lambda, specifically the s3 file location
+    :type event: dict
+    :param context: Instance of LambdaContext, mostly Lambda metadata 
+    :type context: LambdaContext
+    """
+    s3_info = event['Records'][0]['s3']
+    prices_wide_to_long(
+        download_bucket=s3_info['bucket']['name'],
+        key=s3_info['object']['key'],
+        upload_bucket=UPLOAD_BUCKET,
+        s3_client=boto3.client('s3')
+    )
+
+
 def process_prices_last_month(event, context):
     """
     Lambda handler that expects a file in s3 to be specified as a target. Target file will be processed from wide
@@ -44,12 +66,12 @@ def process_prices_last_month(event, context):
     :param event: lambda default requirement
     :param context: lambda default requirement
     """
-    download_bucket = 'wid-prices'
-    upload_bucket = 'wid-prices-processed'
+    
+    
     last_month_bucket_str = (pd.Timestamp.now() - pd.DateOffset(month=1)).strftime('%Y/%m')
-    print(f'Processing files in bucket s3://{download_bucket}/{last_month_bucket_str}')
+    print(f'Processing files in bucket s3://{DOWNLOAD_BUCKET}/{last_month_bucket_str}')
     crawl_and_process_bucket(
-        download_bucket=download_bucket,
-        upload_bucket=upload_bucket,
+        download_bucket=DOWNLOAD_BUCKET,
+        upload_bucket=UPLOAD_BUCKET,
         prefix=last_month_bucket_str
         )
