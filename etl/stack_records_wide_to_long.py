@@ -9,6 +9,7 @@ import pandas as pd
 from io import BytesIO, StringIO
 import os
 from pathlib import Path
+import re
 
 RAW_BUCKET = 'wid-prices'
 PROCESSED_BUCKET = 'wid-prices-processed'
@@ -70,10 +71,13 @@ def read_wide_df_from_s3(download_bucket, key, s3_client):
     :return: Dataframe of whiskey prices
     """
     bio = BytesIO()
-
     s3_client.download_fileobj(Bucket=download_bucket, Key=key, Fileobj=bio)
     bio.seek(0)
-    return pd.read_csv(StringIO(bio.read().decode('utf-8')))
+    if re.match('.csv$', key):
+        return pd.read_csv(StringIO(bio.read().decode('utf-8')))
+    if re.match('.parquet$', key):
+        return pd.read_parquet(bio)
+    raise ValueError('Key must end with either .csv or .parquet')
 
 
 def prices_wide_to_long(download_bucket, key, upload_bucket, s3_client):
