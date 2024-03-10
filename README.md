@@ -1,8 +1,5 @@
 # In-progress
-- set up Glue crawler on new parquet processed bucket wid-prices-processed-parquet
 - copy over contents of csv bucket to parquet bucket in parquet format (wid-prices and wid-prices-processed)
-- turn off writing of csv data
-- turn off lambda to process csv bucket
 - turn off Glue crawler on csv bucket wid-prices-processed
 - delete wid-prices and wid-prices-processed
 - todo: send email on failure
