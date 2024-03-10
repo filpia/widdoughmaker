@@ -4,3 +4,4 @@ numpy
 boto3==1.20.32
 s3fs
 requests
+fastparquet
