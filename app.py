@@ -16,7 +16,7 @@ def handler(event, context):
     '''
     w = wt.WIDTrader()
     w.authenticate()
-    w.log_market_data()
+    w.log_market_data(format='parquet')
 
 
 def log_wid_prices(event, context):
@@ -29,7 +29,7 @@ def log_wid_prices(event, context):
     print('In log_wid_prices()')
     w = wt.WIDTrader()
     w.authenticate()
-    w.log_market_data()
+    w.log_market_data(format='parquet')
 
 
 def raise_error(event, context):
