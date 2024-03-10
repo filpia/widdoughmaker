@@ -61,15 +61,20 @@ class WIDTrader(object):
 
 
     def put_to_s3(self, bucket, key, fpath):
-        f_obj = self.s3.put_object(Bucket=bucket, Key=key, Body=fpath)
+        self.s3.put_object(Bucket=bucket, Key=key, Body=fpath)
         return
 
 
-    def log_market_data(self):
+    def log_market_data(self, s3_bucket_dict, output_format='csv'):
+        assert output_format in ('csv', 'parquet', 'both')
         now = datetime.datetime.now()
         md = self.get_market_data()
-        self.put_to_s3(self.S3_BUCKET, now.strftime('%Y/%m/%d/prices_%H%M%S.csv'), md.to_csv())
-        return
+        if output_format in ('csv', 'both'):
+            s3_bucket = s3_bucket_dict['csv']
+            md.to_csv(f's3://{s3_bucket}/{now.strftime("%Y/%m/%d/prices_%H%M%S.csv")}', index=False)
+        if output_format in ('parquet', 'both'):
+            s3_bucket = s3_bucket_dict['parquet']
+            md.to_parquet(f's3://{s3_bucket}/{now.strftime("%Y/%m/%d/prices_%H%M%S.parquet")}', index=False)
 
 
     def get_market_data(self):
