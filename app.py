@@ -5,11 +5,11 @@ import boto3
 import re
 
 DOWNLOAD_BUCKET_DICT = {
-    'csv': 'wid-prices-test',
+    'csv': 'wid-prices',
     'parquet': 'wid-prices-parquet'
 }
 UPLOAD_BUCKET_DICT = {
-    'csv': 'wid-prices-processed-test',
+    'csv': 'wid-prices-processed',
     'parquet': 'wid-prices-processed-parquet'
 }
 
