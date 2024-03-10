@@ -51,7 +51,7 @@ def wide_to_long(df, key):
     return tmp
 
 
-def upload_df_to_s3(df, upload_bucket, upload_key, s3_client):
+def upload_df_to_s3(df, upload_bucket, upload_key):
     """
     Read file from disk, write data to s3 bucket
     :param df: dataframe of wide whiskey prices, one col for each buy/sell offer and qty
@@ -59,11 +59,12 @@ def upload_df_to_s3(df, upload_bucket, upload_key, s3_client):
     :param upload_key: file name to give to uploaded file
     :return: None
     """
-    # TODO: modify this to conditionally write parquet or csv
-    buffer_to_upload = io.StringIO()
-    df.to_csv(buffer_to_upload, index=False)
-    buffer_to_upload.seek(0)
-    s3_client.put_object(Body=buffer_to_upload.getvalue(), Bucket=upload_bucket, Key=upload_key)
+    if len(re.findall('.csv$', upload_key))>0:
+        df.to_csv(f's3://{upload_bucket}/{upload_key}')
+    elif len(re.findall('.parquet$', upload_key))>0:
+        df.to_parquet(f's3://{upload_bucket}/{upload_key}')
+    else:
+        raise ValueError('format must be one of csv or parquet')
     return None
 
 
@@ -99,7 +100,7 @@ def prices_wide_to_long(download_bucket, key, upload_bucket, s3_client):
 
     wide_df = read_wide_df_from_s3(download_bucket=download_bucket, key=key, s3_client=s3_client)
     long_df = wide_to_long(wide_df, key)
-    upload_df_to_s3(df=long_df, upload_bucket=upload_bucket, upload_key=key, s3_client=s3_client)
+    upload_df_to_s3(df=long_df, upload_bucket=upload_bucket, upload_key=key)
     return long_df
 
 
