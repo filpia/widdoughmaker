@@ -2,9 +2,16 @@ from scraping import wid_tools as wt
 from etl.stack_records_wide_to_long import crawl_and_process_bucket, prices_wide_to_long
 import pandas as pd
 import boto3
+import re
 
-DOWNLOAD_BUCKET = 'wid-prices'
-UPLOAD_BUCKET = 'wid-prices-processed'
+DOWNLOAD_BUCKET_DICT = {
+    'csv': 'wid-prices-test',
+    'parquet': 'wid-prices-parquet'
+}
+UPLOAD_BUCKET_DICT = {
+    'csv': 'wid-prices-processed-test',
+    'parquet': 'wid-prices-processed-parquet'
+}
 
 
 def handler(event, context):
@@ -16,7 +23,7 @@ def handler(event, context):
     '''
     w = wt.WIDTrader()
     w.authenticate()
-    w.log_market_data(s3_bucket=DOWNLOAD_BUCKET, format='parquet')
+    w.log_market_data(s3_bucket_dict=DOWNLOAD_BUCKET_DICT, output_format='both')
 
 
 def log_wid_prices(event, context):
@@ -29,7 +36,7 @@ def log_wid_prices(event, context):
     print('In log_wid_prices()')
     w = wt.WIDTrader()
     w.authenticate()
-    w.log_market_data(s3_bucket=DOWNLOAD_BUCKET, format='parquet')
+    w.log_market_data(s3_bucket_dict=DOWNLOAD_BUCKET_DICT, output_format='both')
 
 
 def raise_error(event, context):
@@ -51,27 +58,15 @@ def process_file_s3_trigger(event, context):
     :type context: LambdaContext
     """
     s3_info = event['Records'][0]['s3']
+    if len(re.findall('.csv$', s3_info['object']['key'])):
+        upload_bucket = UPLOAD_BUCKET_DICT['csv']
+    elif len(re.findall('.parquet$', s3_info['object']['key'])):
+        upload_bucket = UPLOAD_BUCKET_DICT['parquet']
+    else:
+        raise ValueError(f"File {s3_info['object']['key']} must have extension .csv or .parquet")
     prices_wide_to_long(
         download_bucket=s3_info['bucket']['name'],
         key=s3_info['object']['key'],
-        upload_bucket=UPLOAD_BUCKET,
+        upload_bucket=upload_bucket,
         s3_client=boto3.client('s3')
     )
-
-
-def process_prices_last_month(event, context):
-    """
-    Lambda handler that expects a file in s3 to be specified as a target. Target file will be processed from wide
-    orientation to long
-    :param event: lambda default requirement
-    :param context: lambda default requirement
-    """
-    
-    
-    last_month_bucket_str = (pd.Timestamp.now() - pd.DateOffset(month=1)).strftime('%Y/%m')
-    print(f'Processing files in bucket s3://{DOWNLOAD_BUCKET}/{last_month_bucket_str}')
-    crawl_and_process_bucket(
-        download_bucket=DOWNLOAD_BUCKET,
-        upload_bucket=UPLOAD_BUCKET,
-        prefix=last_month_bucket_str
-        )
