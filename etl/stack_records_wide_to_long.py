@@ -93,7 +93,7 @@ def prices_wide_to_long(download_bucket, key, upload_bucket, s3_client):
     return long_df
 
 
-def crawl_and_process_bucket(download_bucket, upload_bucket, prefix=''):
+def crawl_and_process_bucket(download_bucket, upload_bucket, prefix='', max_items_to_process=1000):
     """_summary_
     Initialize an s3 client and list objects in download_bucket matching a prefix. Check whether to process
     that file by seeing whether there's an accompanying one in the upload_bucket.
@@ -104,7 +104,10 @@ def crawl_and_process_bucket(download_bucket, upload_bucket, prefix=''):
     paginator = s3_client.get_paginator('list_objects_v2')
     page_iterator = paginator.paginate(
         Bucket=download_bucket,
-        Prefix=prefix
+        Prefix=prefix,
+        PaginationConfig={
+            'MaxItems': max_items_to_process
+        }
         )
     for page in page_iterator:
         for obj in page['Contents']:
@@ -127,10 +130,13 @@ def crawl_and_process_bucket(download_bucket, upload_bucket, prefix=''):
 
 if __name__ == "__main__":
     # modify prefix as needed YEAR/MONTH/DAY/FILE_NAME
-    days = list(map(lambda x: x.strftime("%Y/%m/%d"), pd.date_range('2023-01-01','2023-12-31', freq='W-MON')))
+    # days = list(map(lambda x: x.strftime("%Y/%m/%d"), pd.date_range('2022-03-08','2024-03-01', freq='D')))
+    days = pd.date_range('2022-03-08','2024-03-01', freq='D')
     for day_as_bucket in days:
+        print(day_as_bucket)
         crawl_and_process_bucket(
             download_bucket=RAW_BUCKET,
             upload_bucket=PROCESSED_BUCKET,
-            prefix=day_as_bucket
+            prefix=day_as_bucket.strftime("%Y/%m/%d"),
+            max_items_to_process=20
         )
