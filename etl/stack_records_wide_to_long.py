@@ -60,12 +60,13 @@ def upload_df_to_s3(df, upload_bucket, upload_key):
     :return: None
     """
     if len(re.findall('.csv$', upload_key))>0:
-        df.to_csv(f's3://{upload_bucket}/{upload_key}')
+        df.to_csv(f's3://{upload_bucket}/{upload_key}', index=False)
+        return
     elif len(re.findall('.parquet$', upload_key))>0:
-        df.to_parquet(f's3://{upload_bucket}/{upload_key}')
+        df.to_parquet(f's3://{upload_bucket}/{upload_key}', index=False)
+        return
     else:
         raise ValueError('format must be one of csv or parquet')
-    return None
 
 
 def read_wide_df_from_s3(download_bucket, key, s3_client):
