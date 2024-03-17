@@ -4,14 +4,11 @@ Processing script to take wide files and transform to long
 Traverse s3 bucket to find raw files which don't have processed counterpart
 """
 import boto3
-import io
 import pandas as pd
-from io import BytesIO, StringIO
 import os
 from pathlib import Path
-import re
 
-from utils import read_s3_to_dataframe, upload_df_to_s3
+from etl.utils import read_s3_to_dataframe, upload_df_to_s3
 
 RAW_BUCKET = 'wid-prices'
 PROCESSED_BUCKET = 'wid-prices-processed'
