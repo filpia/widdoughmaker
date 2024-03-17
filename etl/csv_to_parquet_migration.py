@@ -9,8 +9,7 @@ import pandas as pd
 import boto3
 import os
 from pathlib import Path
-
-from utils import read_s3_to_dataframe, upload_df_to_s3
+from etl.utils import read_s3_to_dataframe, upload_df_to_s3
 
 def copy_csv_bucket_to_parquet(csv_bucket, parquet_bucket, prefix):
     """
@@ -50,16 +49,36 @@ def copy_csv_bucket_to_parquet(csv_bucket, parquet_bucket, prefix):
                     Path(f"errors_processing/{obj['Key']}").mkdir(parents=True, exist_ok=True)
                     os.system(f"touch errors_processing/csv_to_parquet_{obj['Key']}")
             else:
-                print(f"Skipping {obj['Key']} because processed version already exists {parquet_key}")
+                print(f"Skipping {csv_bucket}/{obj['Key']} because processed version already exists {parquet_bucket}{parquet_key}")
     return
 
 
 if __name__ == "__main__":
-    days = pd.date_range('2019-04-07','2024-03-15', freq='D')
+    from joblib import Parallel, delayed
+
+    days = pd.date_range('2020-04-01','2024-03-15', freq='D')
     for day_as_bucket in days:
         print(day_as_bucket)
         copy_csv_bucket_to_parquet(
-            csv_bucket='wid-prices',
-            parquet_bucket='wid-prices-parquet',
+            csv_bucket='wid-prices-processed',
+            parquet_bucket='wid-prices-processed-parquet', 
             prefix=day_as_bucket.strftime("%Y/%m/%d")
         )
+    # days = pd.date_range('2019-04-30','2024-03-15', freq='D')
+    # Parallel(
+    #     n_jobs=-2,
+    #     verbose=True,
+    #     prefer='threads')(delayed(copy_csv_bucket_to_parquet)(
+    #         csv_bucket='wid-prices',
+    #         parquet_bucket='wid-prices-parquet',
+    #         prefix=day_as_bucket.strftime("%Y/%m/%d")
+    #     ) for day_as_bucket in days)
+    # days = pd.date_range('2019-04-08','2024-03-15', freq='D')
+    # Parallel(
+    #     n_jobs=-2,
+    #     verbose=True,
+    #     prefer='threads')(delayed(copy_csv_bucket_to_parquet)(
+            # csv_bucket='wid-prices-processed',
+            # parquet_bucket='wid-prices-processed-parquet',
+    #         prefix=day_as_bucket.strftime("%Y/%m/%d")
+    #     ) for day_as_bucket in days)
