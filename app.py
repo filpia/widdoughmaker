@@ -10,7 +10,7 @@ DOWNLOAD_BUCKET_DICT = {
 }
 UPLOAD_BUCKET_DICT = {
     'csv': 'wid-prices-processed',
-    'parquet': 'wid-prices-processed-parquet'
+    'parquet': 'wid-prices-processed-parquet-test'
 }
 
 
