@@ -7,6 +7,7 @@ import boto3
 import pandas as pd
 import os
 from pathlib import Path
+import numpy as np
 
 from etl.utils import read_s3_to_dataframe, upload_df_to_s3
 
@@ -47,6 +48,14 @@ def wide_to_long(df, key):
     tmp['value_type'] = tmp['value_field'].apply(lambda x: x.split('_')[-1])
     tmp['value_type_order'] = tmp['value_field'].apply(lambda x: x.split('_')[1])
     tmp.drop(['value_field'], axis=1, inplace=True)
+    
+    # dtype casting, if not listed then cast to string
+    dtype_mapping = {
+        'value': np.float64,
+        'year': np.int64
+    }
+    for col in tmp.columns:
+        tmp[col] = tmp[col].astype(dtype_mapping.get(col, str))
     return tmp
 
 
