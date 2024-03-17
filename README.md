@@ -2,6 +2,7 @@
 - copy over contents of csv bucket to parquet bucket in parquet format (wid-prices and wid-prices-processed)
 - turn off Glue crawler on csv bucket wid-prices-processed
 - delete wid-prices and wid-prices-processed
+- Cleanup python imports and such, maybe so that the repo can be installed as a package? Right now relative imports suck..
 - todo: send email on failure
 
 # Goals:
