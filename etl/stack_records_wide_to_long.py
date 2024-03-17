@@ -11,6 +11,8 @@ import os
 from pathlib import Path
 import re
 
+from utils import read_s3_to_dataframe, upload_df_to_s3
+
 RAW_BUCKET = 'wid-prices'
 PROCESSED_BUCKET = 'wid-prices-processed'
 
@@ -51,43 +53,6 @@ def wide_to_long(df, key):
     return tmp
 
 
-def upload_df_to_s3(df, upload_bucket, upload_key):
-    """
-    Read file from disk, write data to s3 bucket
-    :param df: dataframe of wide whiskey prices, one col for each buy/sell offer and qty
-    :param upload_bucket: bucket to upload file to
-    :param upload_key: file name to give to uploaded file
-    :return: None
-    """
-    if len(re.findall('.csv$', upload_key))>0:
-        df.to_csv(f's3://{upload_bucket}/{upload_key}', index=False)
-        return
-    elif len(re.findall('.parquet$', upload_key))>0:
-        df.to_parquet(f's3://{upload_bucket}/{upload_key}', index=False)
-        return
-    else:
-        raise ValueError('format must be one of csv or parquet')
-
-
-def read_wide_df_from_s3(download_bucket, key, s3_client):
-    """
-    Download bytes object from s3 into in-memory buffer. Read into dataframe and return
-    :param download_bucket: s3 bucket to download from
-    :param key: path in bucket where file is downloaded from/written to
-    :return: Dataframe of whiskey prices
-    """
-    bio = BytesIO()
-    s3_client.download_fileobj(Bucket=download_bucket, Key=key, Fileobj=bio)
-    bio.seek(0)
-    if len(re.findall('.csv$', key))>0:
-        print(f'CSV file detected. Reading csv file {key}')
-        return pd.read_csv(StringIO(bio.read().decode('utf-8')))
-    if len(re.findall('.parquet$', key))>0:
-        print(f'Parquet file detected. Reading parquet file {key}')
-        return pd.read_parquet(bio)
-    raise ValueError(f'Key must end with either .csv or .parquet. {key}')
-
-
 def prices_wide_to_long(download_bucket, key, upload_bucket, s3_client):
     """
     Pull a wide file from download_bucket with path key, transform it to long file and write to another bucket
@@ -99,7 +64,7 @@ def prices_wide_to_long(download_bucket, key, upload_bucket, s3_client):
     :return:
     """
 
-    wide_df = read_wide_df_from_s3(download_bucket=download_bucket, key=key, s3_client=s3_client)
+    wide_df = read_s3_to_dataframe(download_bucket=download_bucket, key=key, s3_client=s3_client)
     long_df = wide_to_long(wide_df, key)
     upload_df_to_s3(df=long_df, upload_bucket=upload_bucket, upload_key=key)
     return long_df
